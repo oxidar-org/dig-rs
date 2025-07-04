@@ -1,7 +1,11 @@
 // Project tasks configuration. See https://zed.dev/docs/tasks for documentation.
 [
   {
-    "label": "dig oxidar.org",
-    "command": "cargo run oxidar.org"
+    "label": "dig-rs",
+    "command": "cargo run google.com",
+    "env": {
+      "RUST_LOG": "trace",
+      "RUST_LOG_STYLE": "always"
+    }
   }
 ]
