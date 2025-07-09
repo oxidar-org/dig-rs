@@ -1,6 +1,5 @@
 use crate::packet::{Domain, Message};
 use anyhow::Result;
-use deku::prelude::*;
 use rand::prelude::*;
 use std::net::{Ipv4Addr, UdpSocket};
 
@@ -20,7 +19,7 @@ struct Client {
 
 impl Client {
     fn send(&self, m: Message) -> Result<()> {
-        let data: Vec<u8> = m.to_bytes()?;
+        let data: Vec<u8> = m.into_bytes();
         self.socket.send(&data)?;
         Ok(())
     }
@@ -28,8 +27,7 @@ impl Client {
     fn receive(&self) -> Result<Message> {
         let mut buffer = [0; 256];
         self.socket.recv(&mut buffer)?;
-        let (_, msg) = Message::from_bytes((&buffer, 0))?;
-        Ok(msg)
+        Message::from_bytes(&buffer)
     }
 }
 

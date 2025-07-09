@@ -3,3 +3,7 @@
 * [RFC Domain Names](https://datatracker.ietf.org/doc/html/rfc1035)
 * [Wikipedia: DNS](https://en.wikipedia.org/wiki/Domain_Name_System)
 * [dig.c](https://github.com/isc-projects/bind9/blob/main/bin/dig/dig.c)
+
+## Tools
+* [Online Hex Editor](https://hexed.it/)
+* [Local Hex Editor](https://github.com/WerWolv/ImHex)
