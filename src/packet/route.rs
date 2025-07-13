@@ -1,9 +1,8 @@
 use crate::packet::Domain;
-use binrw::{BinRead, BinResult, BinWrite, binrw};
+use binrw::{BinRead, BinResult, BinWrite};
 use std::{fmt::Display, net::Ipv4Addr};
 
-#[derive(Clone, Debug, PartialEq)]
-#[binrw]
+#[derive(Clone, Debug, PartialEq, BinRead, BinWrite)]
 #[brw(big)]
 pub struct Route {
     pub domain: Domain,
@@ -12,7 +11,9 @@ pub struct Route {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, BinRead, BinWrite)]
+#[brw(big)]
 pub enum Address {
+    #[brw(magic(4u16))]
     Ipv4(
         #[br(parse_with = parse_ipv4)]
         #[bw(write_with = write_ipv4)]
@@ -30,14 +31,6 @@ impl Display for Address {
 
 #[binrw::parser(reader)]
 fn parse_ipv4() -> BinResult<Ipv4Addr> {
-    let len = u16::read_be(reader)?;
-    if len != 4 {
-        return Err(binrw::Error::AssertFail {
-            pos: reader.stream_position()?,
-            message: "Invalid IPv4 address length".to_string(),
-        });
-    }
-
     let mut buf = [0u8; 4];
     reader.read_exact(&mut buf)?;
     Ok(Ipv4Addr::from(buf))
@@ -45,7 +38,29 @@ fn parse_ipv4() -> BinResult<Ipv4Addr> {
 
 #[binrw::writer(writer)]
 fn write_ipv4(ip: &Ipv4Addr) -> BinResult<()> {
-    4u16.write_be(writer)?;
     writer.write_all(&ip.octets())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+
+    #[test]
+    fn test_address_parse() {
+        let chunk = &[0x00, 0x04, 0x7f, 0x00, 0x00, 0x01];
+        let adr = Address::read(&mut Cursor::new(chunk)).unwrap();
+        assert_eq!(adr.to_string(), "127.0.0.1".to_string());
+    }
+
+    #[test]
+    fn test_address_write() {
+        let ip = Ipv4Addr::new(127, 0, 0, 1);
+        let adr = Address::Ipv4(ip);
+        let mut writer = Cursor::new(Vec::new());
+        adr.write(&mut writer).unwrap();
+
+        assert_eq!(writer.into_inner(), &[0x00, 0x04, 0x7f, 0x00, 0x00, 0x01]);
+    }
 }
