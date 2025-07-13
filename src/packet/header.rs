@@ -13,14 +13,14 @@ pub struct OpCode(B4);
 
 #[derive(Clone, Copy, Debug, PartialEq, Specifier)]
 pub enum Authoritative {
-    Owned,
     Unowned,
+    Owned,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Specifier)]
 pub enum Truncation {
     Complete,
-    Truncated, // 1
+    Truncated,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Specifier)]
@@ -57,4 +57,41 @@ pub struct Header {
     pub an_count: u16,
     pub ar_count: u16,
     pub ns_count: u16,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_recursion_from() {
+        let e = Recursion::from_bytes(1u8).unwrap();
+        let d = Recursion::from_bytes(0u8).unwrap();
+        assert_eq!(e, Recursion::Enabled);
+        assert_eq!(d, Recursion::Disabled);
+    }
+
+    #[test]
+    fn test_truncation_from() {
+        let e = Truncation::from_bytes(1u8).unwrap();
+        let d = Truncation::from_bytes(0u8).unwrap();
+        assert_eq!(e, Truncation::Truncated);
+        assert_eq!(d, Truncation::Complete);
+    }
+
+    #[test]
+    fn test_authoritative_from() {
+        let e = Authoritative::from_bytes(1u8).unwrap();
+        let d = Authoritative::from_bytes(0u8).unwrap();
+        assert_eq!(e, Authoritative::Owned);
+        assert_eq!(d, Authoritative::Unowned);
+    }
+
+    #[test]
+    fn test_mode_from() {
+        let e = QueryMode::from_bytes(1u8).unwrap();
+        let d = QueryMode::from_bytes(0u8).unwrap();
+        assert_eq!(e, QueryMode::Response);
+        assert_eq!(d, QueryMode::Query);
+    }
 }
