@@ -14,11 +14,11 @@ fn main() -> anyhow::Result<()> {
     let client = client::connect(&nameserver)?;
     trace!("Connected to nameserver {nameserver}");
 
-    let ips = client.query_aa(args.name())?;
-    trace!("Found {} addresses", ips.len());
+    let routes = client.query_aa(args.name())?;
+    trace!("Found {} routes", routes.len());
 
-    for ip in ips {
-        println!("Domain exists at: {ip}");
+    for r in routes {
+        println!("{} exists at: {}", r.domain.name(), r.adr);
     }
 
     Ok(())

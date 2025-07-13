@@ -6,25 +6,9 @@ use std::{fmt::Display, net::Ipv4Addr};
 #[binrw]
 #[brw(big)]
 pub struct Route {
-    domain: Domain,
-    ttl: u32,
-    adr: Address,
-}
-
-impl Route {
-    pub fn ipv4(&self) -> Option<Ipv4Addr> {
-        match self.adr {
-            Address::Ipv4(ip) => Some(ip),
-        }
-    }
-}
-
-impl Display for Address {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Address::Ipv4(ip) => write!(f, "{ip}"),
-        }
-    }
+    pub domain: Domain,
+    pub ttl: u32,
+    pub adr: Address,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, BinRead, BinWrite)]
@@ -34,6 +18,14 @@ pub enum Address {
         #[bw(write_with = write_ipv4)]
         Ipv4Addr,
     ),
+}
+
+impl Display for Address {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Address::Ipv4(ip) => write!(f, "{ip}"),
+        }
+    }
 }
 
 #[binrw::parser(reader)]

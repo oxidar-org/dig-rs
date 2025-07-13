@@ -1,10 +1,10 @@
-use crate::packet::{Domain, Message};
+use crate::packet::{Domain, Message, Route};
 use anyhow::Result;
 use rand::prelude::*;
 use std::net::{Ipv4Addr, UdpSocket};
 
 pub trait DNSResolver {
-    fn query_aa(&self, domain: &str) -> Result<Vec<Ipv4Addr>>;
+    fn query_aa(&self, domain: &str) -> Result<Vec<Route>>;
 }
 
 pub fn connect(addr: &str) -> Result<impl DNSResolver> {
@@ -32,12 +32,12 @@ impl Client {
 }
 
 impl DNSResolver for Client {
-    fn query_aa(&self, domain: &str) -> Result<Vec<Ipv4Addr>> {
+    fn query_aa(&self, domain: &str) -> Result<Vec<Route>> {
         let mut rng = rand::rng();
         let domain = Domain::new_aa(domain.try_into()?);
         let msg = Message::query_domain(rng.random(), domain);
         self.send(msg)?;
         let resp = self.receive()?;
-        Ok(resp.answers().iter().filter_map(|a| a.ipv4()).collect())
+        Ok(resp.answers().to_vec())
     }
 }
